@@ -1,0 +1,264 @@
+load("/Users/jrenshon/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/midsoutcome4.rdata")
+load("/Users/jrenshon/Desktop/BTwarsdata.rdata")
+wars<-load("/Users/jrenshon/Desktop/BTwarsdata.rdata")
+wars
+names(cols)
+head(wars)
+wars<-load("/Users/jrenshon/Desktop/BTwarsdata.rdata")
+head(wars)
+setwd('/Users/jrenshon/Dropbox/CURRENT_WORK/Shared work with Dustin/Data/Physiodata/CSV_Files')#
+anxiety<-read.csv("anxiety.csv") ## Load Data
+setwd('/Users/jrenshon/Dropbox/CURRENT_WORK/Shared work with Dustin/Data/Physiodata/CSV_Files')#
+anxiety<-read.csv("anxiety.csv") ## Load Data#
+#
+#Mediation model with controls#
+#Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+Mediation model with controls#
+#Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+library(Zelig)
+Mediation model with controls#
+#Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+anxiety<-read.csv("anxiety.csv") ## Load Data
+noRelaxCond <- subset(anxiety, anxcond3>0)
+Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+Outcome Model#
+y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-lm(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+library(mediation)
+Mediation model with controls#
+## Make Subsets (do this last)#
+noRelaxCond <- subset(anxiety, anxcond3>0)#
+#
+#Outcome Model#
+y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-lm(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, model="ls", data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+anxiety<-read.csv("anxiety.csv") ## Load Data
+col(anxiety)
+colnames(anxiety)
+y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data= noRelaxCond)
+noRelaxCond <- subset(anxiety, anxcond3>0)#
+#
+#Outcome Model#
+y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data=noRelaxCond)
+y <- lm(immigration ~ anxcond+SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, model="ls", data=noRelaxCond)
+Outcome Model#
+y <- lm(immigration ~ anxcond+SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, data=noRelaxCond)
+Outcome Model#
+y <- lm(immigration ~ anxcond+SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, data=noRelaxCond)#
+#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-lm(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, data= noRelaxCond)#
+#
+summary(m) # summarize results from model#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+#
+summary(m.out)#
+postscript(file="mediation-wControls.eps",#
+           paper="special",#
+           width=7,#
+           height=7,#
+           horizontal=FALSE)#
+par(mar=c(5,6.5,3.2,01))#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+sensitivity<-medsens(m.out, rho.by = 0.1)#
+summary(sensitivity)
+plot(sensitivity, sign.prod="positive", sens.par = "R2", r.type = c("residual"), xlab="Proportion of Total Variance in M \nExplained by Confounder", ylab="Proportion of Total Variance in Y \n Explained by Confounder", main="(a)")
+anxiety<-read.csv("anxiety.csv")
+noRelaxCond <- subset(anxiety, anxcond3>0)#
+#
+#Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond, model="ls", data= noRelaxCond)#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond, model="ls", data= noRelaxCond)#
+summary(m) # summarize results from model#
+#
+# Mediation Analysis#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+summary(m.out)#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+noRelaxCond <- subset(anxiety, anxcond3>0)#
+#
+#Outcome Model#
+y <- zelig(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond, model="ls", data= noRelaxCond)#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-zelig(SCDBradSelfReport1_mean ~ anxcond+storycond, model="ls", data= noRelaxCond)#
+summary(m) # summarize results from model#
+#
+# Mediation Analysis#
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+summary(m.out)#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+library(mediation)#
+library(memisc)#
+library(Zelig)#
+library(gplots)#
+#
+mturk<-read.csv("mTurk.csv") #
+vidcond<-factor(x=mturk$anxcond3, labels=c("Relax", "Neutral", "Cliffhanger"))#
+mturk<-cbind(mturk, vidcond)#
+#
+# Anxiety#
+plot( 0 , type = "n" , bty = "n" , xlab = "Video Condition" , ylab = "Self-reported Anxiety" , main = "(a)" , xlim = c(.75,3.25) , ylim = c(0,5), axes=TRUE, xaxt='n' )#
+polygon(x=c(-100,100,100,-100),y=c(-100,-100,100,100),col="gray80")#
+abline(v=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.5),col="gray95",lwd=2)#
+plotmeans(anxious_video ~ vidcond, data=mturk,connect=FALSE, n.label=TRUE, xlab="Video Condition", ylab="",barwidth=6,ylim=c(-1,2), add=TRUE)  #
+box()
+plot( 0 , type = "n" , bty = "n" , xlab = "Video Condition" , ylab = "Self-reported Anxiety" , main = "(a)" , xlim = c(.75,3.25) , ylim = c(0,5), axes=TRUE, xaxt='n' )#
+polygon(x=c(-100,100,100,-100),y=c(-100,-100,100,100),col="gray80")#
+abline(v=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.5),col="gray95",lwd=2)#
+plotmeans(anxious_video ~ vidcond, data=mturk,connect=FALSE, n.label=TRUE, xlab="Video Condition", ylab="",barwidth=6,ylim=c(-1,2), add=TRUE)  #
+box()
+Anxiety Plus (Anxiety/Worry/Angry)#
+plot( 0 , type = "n" , bty = "n" , xlab = "Video Condition" , ylab = "Self-reported \nAnxiety/Worry/Angry" , main = "(b)" , xlim = c(.75,3.25) , ylim = c(0,5), axes=TRUE, xaxt='n' )#
+polygon(x=c(-100,100,100,-100),y=c(-100,-100,100,100),col="gray80")#
+abline(v=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.5),col="gray95",lwd=2)#
+plotmeans(anxiousplus_video ~ vidcond, data=mturk,connect=FALSE, n.label=TRUE, xlab="Video Condition", ylab="",barwidth=6,ylim=c(-1,2), add=TRUE)  #
+box()
+Hope#
+plot( 0 , type = "n" , bty = "n" , xlab = "Video Condition" , ylab = "Self-reported Hope" , main = "(c)" , xlim = c(.75,3.25) , ylim = c(0,5), axes=TRUE, xaxt='n' )#
+polygon(x=c(-100,100,100,-100),y=c(-100,-100,100,100),col="gray80")#
+abline(v=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.5),col="gray95",lwd=2)#
+plotmeans(hopeful ~ vidcond, data=mturk,connect=FALSE, n.label=TRUE, xlab="Video Condition", ylab="",barwidth=6,ylim=c(-1,2), add=TRUE)  #
+box()
+Pride#
+plot( 0 , type = "n" , bty = "n" , xlab = "Video Condition" , ylab = "Self-reported Pride" , main = "(d)" , xlim = c(.75,3.25) , ylim = c(0,5), axes=TRUE, xaxt='n' )#
+polygon(x=c(-100,100,100,-100),y=c(-100,-100,100,100),col="gray80")#
+abline(v=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.25),col="gray95",lwd=.5)#
+abline(h=seq(0,5,.5),col="gray95",lwd=2)#
+plotmeans(proud ~ vidcond, data=mturk,connect=FALSE, n.label=TRUE, xlab="Video Condition", ylab="",barwidth=6,ylim=c(-1,2), add=TRUE)  #
+box()
+Make Subsets (do this last)#
+noRelaxCond <- subset(anxiety, anxcond3>0)
+Outcome Model#
+y <- lm(immigration ~ anxcond+SCDBradSelfReport1_mean+storycond+ideology+age+race+income+education, data=noRelaxCond)#
+summary(y) # summarize results from model#
+#
+#Mediator Model#
+m<-lm(SCDBradSelfReport1_mean ~ anxcond+storycond+ideology+age+income+race+education, data= noRelaxCond)#
+summary(m) # summarize results from model#
+#
+#Mediation Analysis#
+m.out<-mediate(m,y, sims=10000, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)#
+summary(m.out)#
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))

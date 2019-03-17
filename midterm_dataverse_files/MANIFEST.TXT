@@ -1,0 +1,6 @@
+.Rapp.history (text/plain; charset=US-ASCII) 12502 bytes.
+anxiety.csv (text/plain; charset=US-ASCII) 4279 bytes.
+mTurk.csv (text/plain; charset=US-ASCII) 8967 bytes.
+replication code.do (text/x-stata-syntax; charset=US-ASCII) 2714 bytes.
+replicationdata.dta (application/x-stata) 10438 bytes.
+replicationRcode.R (text/plain; charset=US-ASCII) 4724 bytes.

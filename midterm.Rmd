@@ -1,0 +1,54 @@
+---
+title: "Replication of 'Physiological Arousal and Political Beliefs'"
+author: "Jack Luby"
+date: "3/17/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(mediation)
+library(memisc)
+library(Zelig)
+library(gplots)
+library(knitr)
+library(ri)
+library(RItools)
+library(gt)
+library(RColorBrewer)
+library(broom)
+library(stringr)
+library(rstanarm)
+library(tidyverse)
+library(stargazer)
+library(rstan)
+library(arm)
+```
+
+```{r}
+# Figure 3
+# Causal Mediation Plot
+
+# Load Data
+anxiety<-read.csv("midterm_dataverse_files/anxiety.csv") 
+
+## Make Subsets (do this last)
+noRelaxCond <- subset(anxiety, anxcond3>0)
+
+#Outcome Model
+y <- bayesglm(immigration ~ anxcond + SCDBradSelfReport1_mean + storycond, method="glm.fit", data= noRelaxCond)
+
+#Mediator Model
+m <- bayesglm(SCDBradSelfReport1_mean ~ anxcond + storycond, method="glm.fit", data= noRelaxCond)
+
+# Mediation Analysis
+m.out <- mediate(m, y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
+par(mar=c(5,6,4,1)+.1)
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+```
+
