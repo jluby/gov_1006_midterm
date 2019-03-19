@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
 ```
 
 ```{r libraries}
@@ -71,12 +71,19 @@ replication_data %>%
 ```
 
 
-```{r table 1}
-# Change this to a stan_glm
-star1 <- lm(SCDBradSelfReport1_mean ~ anxcond, data = noRelaxCond)
+```{r table 1, results = "asis"}
+lm1 <- lm(SCDBradSelfReport1_mean ~ anxcond, data = noRelaxCond)
 
-star2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = noRelaxCond)
+lm2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = noRelaxCond)
+
+stargazer(lm1, lm2, 
+          omit.stat = c("adj.rsq","ll", "F", "ser"), 
+          dep.var.labels = c("SC Reactivity", "Immigration Preferences"),
+          header = FALSE,
+          title = "Main Results",
+          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity while answering questions"))
 ```
+
 
 ```{r figure 3}
 # Figure 3 - Causal Mediation Plot
