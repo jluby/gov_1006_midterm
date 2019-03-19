@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
-```{r}
+```{r libraries}
 library(mediation)
 library(memisc)
 library(Zelig)
@@ -28,27 +28,102 @@ library(tidyverse)
 library(stargazer)
 library(rstan)
 library(arm)
+library(haven)
 ```
 
 ```{r}
-# Figure 3
-# Causal Mediation Plot
+# Loading data in. I changed the csv read-in to read_csv for no good reason 
+# other than I think it looks like a better function. Before starting I took 
+# out a bunch of unnecessary information, and I needed to change the read-in 
+# a bit to recognize the fact that the files were constained in my 
+# midterm_dataverse_files folder.
 
-# Load Data
-anxiety<-read.csv("midterm_dataverse_files/anxiety.csv") 
+anxiety <- read_csv("midterm_dataverse_files/anxiety.csv") 
 
-## Make Subsets (do this last)
-noRelaxCond <- subset(anxiety, anxcond3>0)
+# Made this subsetting a bit more tidyverse-y so that it would be a bit more 
+# intuitive what is happening. I made sure that the filtering resulted in the 
+# same subset as subset() by comparing the two with summary(). In this step we 
+# filter out the relax video condition so that we only check the treatment 
+# effect of the anxiety video against the neutral video.
 
-#Outcome Model
-y <- bayesglm(immigration ~ anxcond + SCDBradSelfReport1_mean + storycond, method="glm.fit", data= noRelaxCond)
+noRelaxCond <- anxiety %>% 
+  filter(anxcond3 != 0)
 
-#Mediator Model
-m <- bayesglm(SCDBradSelfReport1_mean ~ anxcond + storycond, method="glm.fit", data= noRelaxCond)
+replication_data <- read_dta("midterm_dataverse_files/replicationdata.dta")
+```
+
+```{r figure 2}
+rep_data_summary <- replication_data %>% 
+  filter(!is.na(anxcond3), !is.na(SCDBradVidManipAll_mean)) %>% 
+  group_by(anxcond3) %>% 
+  summarize(mean = mean(SCDBradVidManipAll_mean), 
+            ci = qt(.95, df = (n() - 1))*sd(SCDBradVidManipAll_mean)/sqrt(n()))
+
+rep_data_summary %>% 
+  ggplot(aes(x = as.factor(anxcond3), y = mean)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci, width=.05))
+
+
+replication_data %>%
+  filter(!is.na(anxcond3)) %>% 
+  ggplot(aes(x = as.factor(anxcond3), y = SCDBradVidManipAll_mean)) + geom_boxplot()
+```
+
+
+```{r table 1}
+# Change this to a stan_glm
+star1 <- lm(SCDBradSelfReport1_mean ~ anxcond, data = noRelaxCond)
+
+star2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = noRelaxCond)
+```
+
+```{r figure 3}
+# Figure 3 - Causal Mediation Plot
+
+# Here we set up the outcome and mediator models so that we can compare 
+# treatment effects as explained through a mediator (ACME), against direct 
+# effects, and against the total effect. Our mediator here is, as shown below, 
+# SCDBradSelfReport1_mean, which represents the physiological reactivity 
+# discussed in the paper. The paper contains a detailed description of the 
+# innerworkings of this causal mediation analysis. Further, I changed the models 
+# from a standard linear model to a bayesian linear model. [...]
+
+# Outcome Model
+
+y <- bayesglm(immigration ~ anxcond + SCDBradSelfReport1_mean + storycond, 
+              data= noRelaxCond)
+
+# Mediator Model
+m <- bayesglm(SCDBradSelfReport1_mean ~ anxcond + storycond, 
+              data= noRelaxCond)
+
+# Below we set the mediation analysis as set out by the authors. We use the 
+# anxiety condition as the treatment and the physiological reactivity as our 
+# mediator. Due to the dropobs option we re-fit our models using data rows shared 
+# between the two models (not sure why this is necessary). The boot option sets a 
+# nonparamtetric bootstrap. 
 
 # Mediation Analysis
-m.out <- mediate(m, y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
+m.out <- mediate(m, 
+                 y, 
+                 sims=500, 
+                 treat="anxcond",
+                 mediator="SCDBradSelfReport1_mean", 
+                 dropobs=TRUE, boot=TRUE, 
+                 conf.level=.90)
+
+# This is sort of a janky way to make sure my labels get shown properly, but 
+# that is what par(mar =) does. Helps to bump out the left side margin so that all 
+# text is visible in the pdf.
+
 par(mar=c(5,6,4,1)+.1)
+
+# Plot the values set out above. I don't love the way this looks but I don't 
+# have much of a good way to change it given that mediate objects cannot be 
+# used in ggplot. Total effect always null, others aren't necessarily but
+# will be at times.
+
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 ```
 
