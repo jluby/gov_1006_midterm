@@ -52,36 +52,141 @@ noRelaxCond <- anxiety %>%
 replication_data <- read_dta("midterm_dataverse_files/replicationdata.dta")
 ```
 
-```{r figure 2}
+```{r figure 2 base}
+# Interestingly, I couldn't find a function to more intuitively create a 95% CI 
+# from means. The qt function below is a method found here:
+# https://www.cyclismo.org/tutorial/R/confidence.html 
+# which does create a quantile to find the upper and lower bounds. I found it 
+# interesting that I had to declare degrees of freedom myself but maybe that's 
+# due to a misunderstanding on my part.
+
 rep_data_summary <- replication_data %>% 
+  
+# Filtering out na's is important here so that we can calculate our summary
+# statistics. This is obviously dangerous to simply remove observations but
+# I felt like it made sense to throw out rows with any incomplete observations.
+  
   filter(!is.na(anxcond3), !is.na(SCDBradVidManipAll_mean)) %>% 
+  
+# Grouping by the condition so that we can develop the necessary summary statistics
+# as presented in the paper. Necessary for proper functioning summarize().
+  
   group_by(anxcond3) %>% 
+  
+# Create the two summary statistics (mean and CI) which we need for the graphic.
+# Saving as rep_data_summary as these are the only two figures we actually need.
+  
   summarize(mean = mean(SCDBradVidManipAll_mean), 
             ci = qt(.95, df = (n() - 1))*sd(SCDBradVidManipAll_mean)/sqrt(n()))
 
-rep_data_summary %>% 
-  ggplot(aes(x = as.factor(anxcond3), y = mean)) + 
-  geom_point() + 
-  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci, width=.05))
 
+# Pretty intuitively creating the graph here using the summary data above.
+
+rep_data_summary %>% 
+  
+# Using ggplot, I create the graphic as presented in the paper. Anxcond3 must be
+# recognized as a discrete variable to it is reverted to a factor.
+  
+  ggplot(aes(x = as.factor(anxcond3), y = mean)) + 
+
+# Plot the mean points
+  
+  geom_point() + 
+
+# Geom_errorbar allows us to add in the bars but interestingly it requires the
+# input of exact values for the upper and lower bounds. These are simply the
+# means plus/minus their respective error values.
+  
+  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci, width=.05)) + 
+
+# Set graph labels. Scale_x_discrete allows us to rename the numbered anxcond3
+# variable which we set as a factor above.
+  
+  ylab("Skin Conductance Reactivity") +
+  xlab("Video Condition") + 
+  scale_x_discrete(labels = c('Relax','Neutral','Anxiety'))
+```
+
+
+```{r figure 2 boxplot}
+# Above I wanted to see how I would go about creating the published figure in
+# R. Obviously that figure is not very illuminating as to the true distributions
+# of reactivity to different video conditions. I decided to create a boxplot to
+# better represent the data.
+
+# Here we use the whole of the data so that we can display the data in more
+# meaningful detail.
 
 replication_data %>%
+
+# Filter out incomplete video condition values because they are not meaningful
+# to our figure. We do not need to filter out na SCDBradVidManipAll_mean values
+# because they will automatically be excluded.
+
   filter(!is.na(anxcond3)) %>% 
-  ggplot(aes(x = as.factor(anxcond3), y = SCDBradVidManipAll_mean)) + geom_boxplot()
+
+# Ggplot is again our friend! We can simply set our as.factor anxcond3 (again
+# a factor because otherwise ggplot will interpret as a continuous variable) 
+# as our x variable with the reactivity values as our y variable.
+
+  ggplot(aes(x = as.factor(anxcond3), y = SCDBradVidManipAll_mean)) + 
+
+# A boxplot will allow us to better view the distribution of our data. There
+# wasn't much else to meaningfully do with this figure without changing what it
+# represents significantly (since we're only dealing with grouped means/medians).
+# The boxplot actually displays the median of reactivity values.
+# The notches of these boxes display the 95% CI for the median values of reactivity
+# and provide a way of comparing the median values (which, of note, differs from the
+# means approach in the original plot).
+  
+  geom_boxplot(notch = TRUE, notchwidth = .2, width = .1) + 
+
+# Set labels as above. Once again scale_x_discrete lets us rename our discrete
+# anxcond3 variables.
+  
+  ylab("Skin Conductance Reactivity") +
+  xlab("Video Condition") + 
+  scale_x_discrete(labels = c('Relax','Neutral','Anxiety'))
 ```
 
 
 ```{r table 1, results = "asis"}
+# Setting up the linear models. These were a bit weird because the second
+# linear model uses a different dependent variable from the first. 
+# We use the noRelaxCond data because we are only looking at the anxiety 
+# treatment versus the neutral condition.
+
+# Lm1 is simply a linear model of treatment effect on physical reactivity
+
 lm1 <- lm(SCDBradSelfReport1_mean ~ anxcond, data = noRelaxCond)
+
+# Lm2 is a linear model of the effect of treatment, varied story conditions
+# and physical reactivity on immigration opinions.
 
 lm2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = noRelaxCond)
 
-stargazer(lm1, lm2, 
+# In order to add an additional analysis of the robustness of these results,
+# I added two additional models in which we use all available variables in the
+# regressions.
+
+lm1_robust_check <- lm(SCDBradSelfReport1_mean ~ anxcond + storycond + ideology + age + race + income + education, data = noRelaxCond)
+
+lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + ideology + age + race + income + education, data = noRelaxCond)
+
+# Stargazer lets us create a nice table here. We omit the statistics that
+# are included automatically in stargazer but are not included in the
+# published table. Then we just change around the labels to make everything
+# look right.
+
+stargazer(lm1, lm2, lm1_robust_check, lm2_robust_check,
           omit.stat = c("adj.rsq","ll", "F", "ser"), 
-          dep.var.labels = c("SC Reactivity", "Immigration Preferences"),
+          dep.var.labels = c("SC Reactivity", "Immigration Preferences", "SC Reactivity+", "Immigration Preferences+"),
+          keep = c("anxcond", "storycond", "SCDBradSelfReport1_mean"),
           header = FALSE,
           title = "Main Results",
-          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity while answering questions"))
+          add.lines = list(c("Subject Fixed Effects", rep("", 2), rep("$\\checkmark$", 2))),
+          font.size = "small",
+          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity"))
 ```
 
 
@@ -94,7 +199,10 @@ stargazer(lm1, lm2,
 # SCDBradSelfReport1_mean, which represents the physiological reactivity 
 # discussed in the paper. The paper contains a detailed description of the 
 # innerworkings of this causal mediation analysis. Further, I changed the models 
-# from a standard linear model to a bayesian linear model. [...]
+# from a standard linear model to a bayesian linear model. This means that, using
+# a t-distribution as a prior, our models iterate over the data, attempting to 
+# maximize the likelihood of our posterior distribution and its coefficient
+# estimates (our outputs). 
 
 # Outcome Model
 
@@ -109,7 +217,14 @@ m <- bayesglm(SCDBradSelfReport1_mean ~ anxcond + storycond,
 # anxiety condition as the treatment and the physiological reactivity as our 
 # mediator. Due to the dropobs option we re-fit our models using data rows shared 
 # between the two models (not sure why this is necessary). The boot option sets a 
-# nonparamtetric bootstrap. 
+# nonparamtetric bootstrap.
+
+# Mediation analysis allows us to look at the extent to which physiological
+# anxiety is causing the effects explained in the article (more exclusionary
+# immigration opinions). The article argues that anxiety induced by video
+# treatments leads to more exclusionary immigration opinions, but we want
+# to know the extent to which that is being caused by physiological anxiety
+# activation as opposed to other factors.
 
 # Mediation Analysis
 m.out <- mediate(m, 
@@ -121,15 +236,14 @@ m.out <- mediate(m,
                  conf.level=.90)
 
 # This is sort of a janky way to make sure my labels get shown properly, but 
-# that is what par(mar =) does. Helps to bump out the left side margin so that all 
-# text is visible in the pdf.
+# that is what par(mar =) is doing. Helps to bump out the left side margin so 
+# that all text is visible in the pdf.
 
 par(mar=c(5,6,4,1)+.1)
 
 # Plot the values set out above. I don't love the way this looks but I don't 
 # have much of a good way to change it given that mediate objects cannot be 
-# used in ggplot. Total effect always null, others aren't necessarily but
-# will be at times.
+# used in ggplot. 
 
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 ```
