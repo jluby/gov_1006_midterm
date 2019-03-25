@@ -6,6 +6,11 @@ output:
   pdf_document: default
   html_document: default
 ---
+## Abstract
+
+This is a replication of the article "Physiological Arousal and Political Beliefs" using code and data available through the public Harvard Dataverse. Below are replications of Figure 2, Table 1, and Figure 3. Several alterations are made to the replicated figures. Figure 2 is first presented in its original form then in a boxplot transformation in order to convey more distributional information. Two additional models, which include subject fixed effects, were added to table 1 to examine robustness. Finally, Figure 3's results were replicated using Bayesian distributions rather than frequentist. Formatting was improved for all three.
+
+As an extension of the article's work, several interaction models, integrating racial-group-specific treatment effects, are explored. These models suggest potentially interesting racial differences in treatment effects, but the power of these results are limited by a scarcity of observations.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
@@ -32,7 +37,7 @@ library(haven)
 library(tidybayes)
 ```
 
-```{r}
+```{r read-in data}
 # Loading data in. I changed the csv read-in to read_csv for no good reason 
 # other than I think it looks like a better function. Before starting I took 
 # out a bunch of unnecessary information, and I needed to change the read-in 
@@ -105,7 +110,9 @@ rep_data_summary %>%
   
   ylab("Skin Conductance Reactivity") +
   xlab("Video Condition") + 
-  scale_x_discrete(labels = c('Relax','Neutral','Anxiety'))
+  scale_x_discrete(labels = c('Relax','Neutral','Anxiety')) +
+  labs(title = "Video Condition Significantly Affects Physiological Anxiety Response",
+       subtitle = "As measured by skin conductance reactivity")
 ```
 
 
@@ -147,7 +154,9 @@ replication_data %>%
   
   ylab("Skin Conductance Reactivity") +
   xlab("Video Condition") + 
-  scale_x_discrete(labels = c('Relax','Neutral','Anxiety'))
+  scale_x_discrete(labels = c('Relax','Neutral','Anxiety')) + 
+  labs(title = "Boxplot Analysis Paints a Far Murkier Picture",
+       subtitle = "Observational distributions display significant overlap")
 ```
 
 
@@ -170,9 +179,9 @@ lm2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = no
 # I added two additional models in which we use all available variables in the
 # regressions.
 
-lm1_robust_check <- lm(SCDBradSelfReport1_mean ~ anxcond + ideology + age + income, data = noRelaxCond)
+lm1_robust_check <- lm(SCDBradSelfReport1_mean ~ anxcond + ideology + age + income + as.factor(race) + education, data = noRelaxCond)
 
-lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + ideology + age + income, data = noRelaxCond)
+lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + ideology + age + income + as.factor(race) + education, data = noRelaxCond)
 
 # Stargazer lets us create a nice table here. We omit the statistics that
 # are included automatically in stargazer but are not included in the
@@ -246,36 +255,63 @@ par(mar=c(5,6,4,1)+.1)
 # have much of a good way to change it given that mediate objects cannot be 
 # used in ggplot. 
 
-plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"), main = "Anxiety Conditions Affect Immigration Stance \nThrough Physiological Activation")
 ```
 
-```{r extension, results = "hide"}
-inter_1 <- lm(immigration ~ anxcond + anxcond*as.factor(race), data = noRelaxCond)
+```{r interaction_effects_analysis, results = "hide"}
+# For my extension, I decided to take a look at how the treatment effect
+# varied by racial groups. At first I thought about trying to integrate
+# random effects into the model but after learning more about random effects
+# I realized that didn't make much sense for this data. First thing I recoded
+# the race values so that they would be a bit cleaner in the output table and
+# could be directly interpretable as factors. "Other" was input as "Other"
+# because even with -1 in the models, the first alphabetical variable was
+# dropped, I believe due to this: 
+# https://stackoverflow.com/questions/41032858/lm-summary-not-display-all-factor-levels
+# I decided to drop "other" because it isn't a particularly meaningful
+# variable to include in the model.
 
-inter_2 <- lm(immigration ~ anxcond + anxcond*as.factor(race) + anxcond*income, data = noRelaxCond)
+noRelaxCond <- noRelaxCond %>% 
+  mutate(race = case_when(race == 1 ~ "Caucasian",
+                         race == 2 ~ "AfricanAmerican",
+                         race == 3 ~ "Asian",
+                         race == 4 ~ "Hispanic",
+                         race == 7 ~ "-Other"))
 
-inter_3 <- lm(immigration ~ anxcond + storycond + anxcond*as.factor(race) + storycond*as.factor(race), data = noRelaxCond)
+# To avoid getting too complicated, I decided to only use race as an interaction
+# term with video condition. With this, I felt like I would be able to make more
+# straightforward analyses of the results. I tried including interactions with
+# story condition as well but the interpretation got too complicated to be really
+# worthwhile. I kept the models as lm's rather than stan_glm mostly just because
+# I wanted to stay consistent with stargazer style.
 
-inter_4 <- lm(immigration ~ anxcond + storycond + anxcond*as.factor(race) + storycond*as.factor(race) + anxcond*income + storycond*income, data = noRelaxCond)
+inter_1 <- lm(immigration ~ anxcond + race + (anxcond:race - 1), data = noRelaxCond)
 
-inter_5 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + anxcond*as.factor(race) + storycond*as.factor(race), data = noRelaxCond)
+inter_2 <- lm(immigration ~ anxcond + storycond + race + (anxcond:race - 1), data = noRelaxCond)
 
-inter_6 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + anxcond*as.factor(race) + storycond*as.factor(race) + anxcond*income + storycond*income, data = noRelaxCond)
+inter_3 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + race + (anxcond:race - 1), data = noRelaxCond)
 
-star <- stargazer(inter_1, inter_2, inter_3, inter_4, inter_5, inter_6,
+# Stargazer options adapted from above. All of this should be fairly intuitive.
+# I felt like the output was pretty interesting so I'm glad I went about my
+# extension this way.
+
+star <- stargazer(inter_1, inter_2, inter_3, 
           omit.stat = c("adj.rsq","ll", "F", "ser"),
-          dep.var.labels = c("SC Reactivity", "Immigration Preferences"),
-          keep = c(1, 2, 3, 4),
+          dep.var.labels = c("Immigration Preferences"),
           header = FALSE,
           title = "Grouped Results",
           covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity"))
 
+# I decided to remove the "other" intercept as well because I felt like it was
+# only cluttering the table when it wasn't really meaningful, especially when
+# missing a coefficient.
+
 star <- star[-c(22:24)]
 ```
 
-```{r results = "asis"}
+```{r extension_table, results = "asis"}
+# This step is only necessary because I needed to manually remove the "-Other"
+# intercept and then print.
+
 cat(paste(star))
 ```
-
-
-
