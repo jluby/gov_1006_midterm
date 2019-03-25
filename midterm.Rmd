@@ -29,6 +29,7 @@ library(stargazer)
 library(rstan)
 library(arm)
 library(haven)
+library(tidybayes)
 ```
 
 ```{r}
@@ -169,9 +170,9 @@ lm2 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean, data = no
 # I added two additional models in which we use all available variables in the
 # regressions.
 
-lm1_robust_check <- lm(SCDBradSelfReport1_mean ~ anxcond + storycond + ideology + age + race + income + education, data = noRelaxCond)
+lm1_robust_check <- lm(SCDBradSelfReport1_mean ~ anxcond + ideology + age + income, data = noRelaxCond)
 
-lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + ideology + age + race + income + education, data = noRelaxCond)
+lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + ideology + age + income, data = noRelaxCond)
 
 # Stargazer lets us create a nice table here. We omit the statistics that
 # are included automatically in stargazer but are not included in the
@@ -247,4 +248,34 @@ par(mar=c(5,6,4,1)+.1)
 
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 ```
+
+```{r extension, results = "hide"}
+inter_1 <- lm(immigration ~ anxcond + anxcond*as.factor(race), data = noRelaxCond)
+
+inter_2 <- lm(immigration ~ anxcond + anxcond*as.factor(race) + anxcond*income, data = noRelaxCond)
+
+inter_3 <- lm(immigration ~ anxcond + storycond + anxcond*as.factor(race) + storycond*as.factor(race), data = noRelaxCond)
+
+inter_4 <- lm(immigration ~ anxcond + storycond + anxcond*as.factor(race) + storycond*as.factor(race) + anxcond*income + storycond*income, data = noRelaxCond)
+
+inter_5 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + anxcond*as.factor(race) + storycond*as.factor(race), data = noRelaxCond)
+
+inter_6 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + anxcond*as.factor(race) + storycond*as.factor(race) + anxcond*income + storycond*income, data = noRelaxCond)
+
+star <- stargazer(inter_1, inter_2, inter_3, inter_4, inter_5, inter_6,
+          omit.stat = c("adj.rsq","ll", "F", "ser"),
+          dep.var.labels = c("SC Reactivity", "Immigration Preferences"),
+          keep = c(1, 2, 3, 4),
+          header = FALSE,
+          title = "Grouped Results",
+          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity"))
+
+star <- star[-c(22:24)]
+```
+
+```{r results = "asis"}
+cat(paste(star))
+```
+
+
 
