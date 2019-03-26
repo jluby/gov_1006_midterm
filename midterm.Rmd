@@ -5,10 +5,12 @@ date: "3/17/2019"
 output:
   pdf_document: default
   html_document: default
+citation_package: natbib
+bibliography: bibliography.bib
 ---
 ## Abstract
 
-This is a replication of the article "Physiological Arousal and Political Beliefs" using code and data available through the public Harvard Dataverse. Below are replications of Figure 2, Table 1, and Figure 3. Several alterations are made to the replicated figures. Figure 2 is first presented in its original form then in a boxplot transformation in order to convey more distributional information. Two additional models, which include subject fixed effects, were added to table 1 to examine robustness. Finally, Figure 3's results were replicated using Bayesian distributions rather than frequentist. Formatting was improved for all three.
+This is a replication of the article "Physiological Arousal and Political Beliefs" (@renshon_lee_tingley_2014) using code and data available through the public Harvard Dataverse (@DVN/24318_2014). Below are replications of Figure 2, Table 1, and Figure 3. Several alterations are made to the replicated figures. Figure 2 is first presented in its original form then in a boxplot transformation in order to convey more distributional information. Two additional models, which include subject fixed effects, were added to table 1 to examine robustness. Finally, Figure 3's results were replicated using Bayesian distributions rather than frequentist. Formatting was improved for all three.
 
 As an extension of the article's work, several interaction models, building upon the authors' work by integrating racial-group-specific treatment effects, are explored. These models suggest potentially interesting racial differences in treatment effects, but the power of these results are limited by a scarcity of observations.    
 
@@ -332,7 +334,7 @@ star2 <- stargazer(inter_1, inter_2, inter_3,
 
 star2 <- star2[-c(22:24)]
 
-note.latex <- "\\multicolumn{4}{l} {\\parbox[t]{10cm}{ \\textit{Notes:} Models (1), (2), and (3) utilize racial interaction effects to examine the differences between treatment effects by racial group. These results suggest, interestingly, that the anxiety treatment might decrease exclusionary attitudes in hispanics, and increase those attitudes in all others. Anxiety might increase immigrant-exclusionary attitudes in non-immigrant groups while decreasing immigrant-exclusionary attitudes in populations with traditionally high rates of immigration. This analysis is speculative and is likely biased by the scarcity of hispanic subjects (only 3 study participants). $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01}} \\\\"
+note.latex <- "\\multicolumn{4}{l} {\\parbox[t]{10cm}{ \\textit{Notes:} Models (1), (2), and (3) utilize racial interaction effects to examine the differences between treatment effects by racial group. $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01}} \\\\"
 star2[grepl("Note",star2)] <- note.latex
 ```
 
@@ -341,4 +343,34 @@ star2[grepl("Note",star2)] <- note.latex
 # intercept and then print.
 
 cat(paste(star2))
+
+# I didn't have any brilliant ideas on fixing formatting so I inserted a bunch of page breaks (sorry).
 ```
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+\hfill\break
+
+## Discussion 
+  
+These results suggest, interestingly, that the anxiety treatment might decrease exclusionary attitudes in hispanics, and increase those attitudes in all others. Anxiety might increase immigrant-exclusionary attitudes in non-immigrant groups while decreasing immigrant-exclusionary attitudes in populations with traditionally high rates of immigration. This analysis is speculative and is likely biased by the scarcity of hispanic subjects (only 3 study participants).
+
+## References
