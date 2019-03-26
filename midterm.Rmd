@@ -10,7 +10,9 @@ output:
 
 This is a replication of the article "Physiological Arousal and Political Beliefs" using code and data available through the public Harvard Dataverse. Below are replications of Figure 2, Table 1, and Figure 3. Several alterations are made to the replicated figures. Figure 2 is first presented in its original form then in a boxplot transformation in order to convey more distributional information. Two additional models, which include subject fixed effects, were added to table 1 to examine robustness. Finally, Figure 3's results were replicated using Bayesian distributions rather than frequentist. Formatting was improved for all three.
 
-As an extension of the article's work, several interaction models, integrating racial-group-specific treatment effects, are explored. These models suggest potentially interesting racial differences in treatment effects, but the power of these results are limited by a scarcity of observations.
+As an extension of the article's work, several interaction models, building upon the authors' work by integrating racial-group-specific treatment effects, are explored. These models suggest potentially interesting racial differences in treatment effects, but the power of these results are limited by a scarcity of observations.    
+
+\hfill\break
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
@@ -112,9 +114,10 @@ rep_data_summary %>%
   xlab("Video Condition") + 
   scale_x_discrete(labels = c('Relax','Neutral','Anxiety')) +
   labs(title = "Video Condition Significantly Affects Physiological Anxiety Response",
-       subtitle = "As measured by skin conductance reactivity")
+       subtitle = "As measured by skin conductance reactivity",
+       caption = "Figure 2. Means of skin-conductance reactivity by video condition. 95% confidence intervals are presented \nin black. These distributions suggest that in a simple analysis of treatment group means, we find \nsignificantly different (i.e. non-overlapping CI) physiological responses.") +
+    theme(plot.caption = element_text(hjust = 0))
 ```
-
 
 ```{r figure 2 boxplot}
 # Above I wanted to see how I would go about creating the published figure in
@@ -156,11 +159,14 @@ replication_data %>%
   xlab("Video Condition") + 
   scale_x_discrete(labels = c('Relax','Neutral','Anxiety')) + 
   labs(title = "Boxplot Analysis Paints a Far Murkier Picture",
-       subtitle = "Observational distributions display significant overlap")
+       subtitle = "Observational distributions display significant overlap",
+       caption = "Figure 2 Extension. Boxplots of skin-conductance reactivity by video condition. Box midpoints signify \ngroup medians (rather than means). Notches signify median 95% confidence intervals. Overall data \nvariability appears to be greater than one might expect from Figure 2 alone.") +
+  theme(plot.caption = element_text(hjust = 0))
 ```
 
+\hfill\break
 
-```{r table 1, results = "asis"}
+```{r setup table 1, results = "hide"}
 # Setting up the linear models. These were a bit weird because the second
 # linear model uses a different dependent variable from the first. 
 # We use the noRelaxCond data because we are only looking at the anxiety 
@@ -188,7 +194,7 @@ lm2_robust_check <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_me
 # published table. Then we just change around the labels to make everything
 # look right.
 
-stargazer(lm1, lm2, lm1_robust_check, lm2_robust_check,
+star1 <- stargazer(lm1, lm2, lm1_robust_check, lm2_robust_check,
           omit.stat = c("adj.rsq","ll", "F", "ser"), 
           dep.var.labels = c("SC Reactivity", "Immigration Preferences", "SC Reactivity+", "Immigration Preferences+"),
           keep = c("anxcond", "storycond", "SCDBradSelfReport1_mean"),
@@ -196,7 +202,16 @@ stargazer(lm1, lm2, lm1_robust_check, lm2_robust_check,
           title = "Main Results",
           add.lines = list(c("Subject Fixed Effects", rep("", 2), rep("$\\checkmark$", 2))),
           font.size = "small",
-          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity"))
+          covariate.labels = c("Anxiety Manipulation", "Story Condition", "SC Reactivity"),
+          notes = c(""),
+notes.append = TRUE)
+
+note.latex <- "\\multicolumn{5}{l} {\\parbox[t]{15cm}{ \\textit{Notes:} Models (1) and (3) show the effect of the treatment (anxiety) on physiological reactivity while Models (2) and (4) show the effects of physiological reactivity on immigration preferences, controlling for the story condition. Models (3) and (4) include subject fixed effects for political ideology, age, income, race, and educational attainment. The significance of Model (4) suggests robustness to these fixed effects. $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01}} \\\\"
+star1[grepl("Note",star1)] <- note.latex
+```
+
+```{r print table 1, results = "asis"}
+cat(star1)
 ```
 
 
@@ -255,7 +270,16 @@ par(mar=c(5,6,4,1)+.1)
 # have much of a good way to change it given that mediate objects cannot be 
 # used in ggplot. 
 
-plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"), main = "Anxiety Conditions Affect Immigration Stance \nThrough Physiological Activation")
+plot(m.out, 
+     labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect")) %>%
+  title(main = "Anxiety Conditions Affect Immigration Stance Through \nPhysiological Activation", 
+        sub = c(
+"Figure 3. Causal mediation plot. Treatment is anxiety video manipulation (compared to neutral condition), Mediator is skin 
+conductance reactivity when answering immigration questions, Outcome is composite variable of immigration preferences. 
+Horizontal lines represent 90% confidence intervals for estimates. Analysis was done using bayesian methodology, 
+iteratively developing posterior data using model parameters."),
+        cex.main = 1, font.main= 1, col.main= "black",
+        cex.sub = .6, font.sub = 1, col.sub = "black")
 ```
 
 ```{r interaction_effects_analysis, results = "hide"}
@@ -295,7 +319,7 @@ inter_3 <- lm(immigration ~ anxcond + storycond + SCDBradSelfReport1_mean + race
 # I felt like the output was pretty interesting so I'm glad I went about my
 # extension this way.
 
-star <- stargazer(inter_1, inter_2, inter_3, 
+star2 <- stargazer(inter_1, inter_2, inter_3, 
           omit.stat = c("adj.rsq","ll", "F", "ser"),
           dep.var.labels = c("Immigration Preferences"),
           header = FALSE,
@@ -306,12 +330,15 @@ star <- stargazer(inter_1, inter_2, inter_3,
 # only cluttering the table when it wasn't really meaningful, especially when
 # missing a coefficient.
 
-star <- star[-c(22:24)]
+star2 <- star2[-c(22:24)]
+
+note.latex <- "\\multicolumn{4}{l} {\\parbox[t]{10cm}{ \\textit{Notes:} Models (1), (2), and (3) utilize racial interaction effects to examine the differences between treatment effects by racial group. These results suggest, interestingly, that the anxiety treatment might decrease exclusionary attitudes in hispanics, and increase those attitudes in all others. Anxiety might increase immigrant-exclusionary attitudes in non-immigrant groups while decreasing immigrant-exclusionary attitudes in populations with traditionally high rates of immigration. This analysis is speculative and is likely biased by the scarcity of hispanic subjects (only 3 study participants). $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01}} \\\\"
+star2[grepl("Note",star2)] <- note.latex
 ```
 
 ```{r extension_table, results = "asis"}
 # This step is only necessary because I needed to manually remove the "-Other"
 # intercept and then print.
 
-cat(paste(star))
+cat(paste(star2))
 ```
