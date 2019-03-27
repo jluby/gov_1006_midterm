@@ -1,2 +1,5 @@
-# gov_1006_midterm
-Midterm for Gov 1006
+# Replication of 'Physiological Arousal and Political Beliefs'
+
+This is a replication of the article "Physiological Arousal and Political Beliefs" (@renshon_lee_tingley_2014) using code and data available through the public Harvard Dataverse (@DVN/24318_2014). Below are replications of Figure 2, Table 1, and Figure 3. Several alterations are made to the replicated figures. Figure 2 is first presented in its original form then in a boxplot transformation in order to convey more distributional information. Two additional models, which include subject fixed effects, were added to table 1 to examine robustness. Finally, Figure 3's results were replicated using Bayesian distributions rather than frequentist. Formatting was improved for all three.
+
+As an extension of the article's work, several interaction models, building upon the authors' work by integrating racial-group-specific treatment effects, are explored. These models suggest potentially interesting racial differences in treatment effects, but the power of these results are limited by a scarcity of observations.
